@@ -131,13 +131,12 @@ def printSolution(m, investment_amount, assets):
 
 # %%
 
-def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns):
+assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
+
+def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets):
 
     # Create a new model:
     m = gp.Model("portfolio")
-
-    # Fixed inputs
-    assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
 
     returns = mean_returns
 
@@ -167,6 +166,6 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
 
     m.optimize()
 
-    return m
+    return m, investment_amount
 
 

@@ -5,7 +5,7 @@ import gurobipy as gp
 from gurobipy import GRB,quicksum
 from dash import Dash, dcc, html, Input, State, Output, callback, no_update
 from dash.exceptions import PreventUpdate
-from fct_optimizer import covariance, returns, creating_and_running_optimizer
+from fct_optimizer import covariance, returns, assets, creating_and_running_optimizer
 
 dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
 app = Dash(__name__, external_stylesheets=[dbc.themes.SUPERHERO, dbc_css])
@@ -60,11 +60,12 @@ amount_goal_input = dbc.Row(
                   placeholder = 'Write the investment goal here: 0 - 10 million'
                   ),
         width = 10
-    ),
-    dbc.Col(
-    currency_dropdown,
-    width = 2
     )
+    # , # Leaving out the currency for now - too complex
+    # dbc.Col(
+    # currency_dropdown,
+    # width = 2
+    # )
     ],
     className="mb-4",
 )
@@ -101,19 +102,18 @@ controls = html.Div(
 
 # # OUTPUTS
 df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+    "Assets": assets,
+    "Amount": [0]*len(assets)
 })
 
-fig = px.pie(df, values="Amount", names = 'Fruit')
+fig = px.pie(df, values="Amount", names = 'Assets')
 
 
 
 outputs = html.Div(
     [html.Div(id = 'showing_text', children = 'our output is this'),
      dcc.Graph(
-        id='example-graph',
+        id='pie_chart',
         figure=fig
     )]
 )
@@ -145,6 +145,7 @@ risk_dict = {
 
 @callback(
     Output("showing_text", 'children'),
+    Output('pie_chart', 'figure'),
     Input('submit-val', 'n_clicks'),
     State('risk_level', 'value'),
     State('years', 'value'),
@@ -154,20 +155,39 @@ risk_dict = {
 def update_output(submission_number, risk, years, amount_invested, min_return):
 
     if submission_number is None or submission_number == 0:
-         return no_update
+         return "No data yet", no_update
     
 
     max_risk = risk_dict[risk]
 
-    m = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns)
-    m.optimize()
+    m, investment_amount = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns, assets)
+
+    if m.status == GRB.OPTIMAL:
+        print('\nPortfolio Return: %g' % m.objVal)
+        print('\nInvestment Amount:')
+        investment_amountx = m.getAttr('x', investment_amount) 
+        for a in assets:            
+                print('%s %g' % (a, investment_amountx[a]))
+    else:
+        print('No solution:', m.status)
+
     
     text = ['We have chosen risk level: {}'.format(risk),
             html.Br(), 
             'outcome of optimizer is {}'.format(m.objVal)
             ]
     
-    return text
+
+    df = pd.DataFrame({
+        'Assets': investment_amountx.keys(), 
+        'Amount': investment_amountx.values(), 
+        })
+
+    fig = px.pie(df, values="Amount", names = 'Assets')
+
+
+    
+    return text, fig
 
 
 
