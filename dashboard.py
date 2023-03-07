@@ -170,8 +170,12 @@ def update_output(submission_number, risk, years, amount_invested, min_return):
                 print('%s %g' % (a, investment_amountx[a]))
     else:
         print('No solution:', m.status)
-
-        return "No solution with these inputs", no_update
+        text = html.H1(
+            [
+                html.Div("No solution with these inputs", style={"color": "red"}),
+            ]
+        )
+        return text, px.pie()
 
     
     text = ['We have chosen risk level: {}'.format(risk),
