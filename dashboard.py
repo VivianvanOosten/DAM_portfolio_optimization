@@ -171,6 +171,8 @@ def update_output(submission_number, risk, years, amount_invested, min_return):
     else:
         print('No solution:', m.status)
 
+        return "No solution with these inputs", no_update
+
     
     text = ['We have chosen risk level: {}'.format(risk),
             html.Br(), 
