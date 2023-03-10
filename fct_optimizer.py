@@ -146,7 +146,7 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
                 name = "minimum return accepted")
     else:
         #min return accepted - monthly instalment version
-        m.addConstr((       quicksum(quicksum(investment_amount[a]/(12*time_frame)*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
+        m.addConstr((quicksum( quicksum( (investment_amount[a]/(12*time_frame)) * ((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
                 name = "minimum return accepted")
     
     
@@ -167,8 +167,8 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
                GRB.MAXIMIZE)
     else:
         # Objective function:  - monthly instalment version
-        m.setObjective(quicksum(quicksum(investment_amount[a]/(12*time_frame)*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12)) - amount_invested, 
-                    GRB.MAXIMIZE)
+        m.setObjective(quicksum(quicksum((investment_amount[a]/(12*time_frame))*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12)) - amount_invested, 
+                   GRB.MAXIMIZE)
         
     m.optimize()
 
