@@ -159,6 +159,9 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     #sum of investments
     m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
     
+    #maximum allocation constraint
+    m.addConstrs(((investment_amount[a1] <= 0.4*amount_invested) for a1 in assets), name="maximum allocation constraint")
+    
     if(installment_flag==0):
         # Objective function:
         m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets) - amount_invested, 
