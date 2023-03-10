@@ -38,13 +38,12 @@ currency_dropdown = dcc.Dropdown(
     style = {'color': '#000000'},
 )
 
-time_choices = ['Monthly','One-off']
 monthly_or_not = html.Div(
     [
         dbc.Label("Is the amount below a monthly or a one-off investment?"),
         dbc.RadioItems(
             id="monthly_or_not",
-            options=[{"label": i, "value": i} for i in time_choices],
+            options=[{"label": 'Monthly', "value": 1}, {'label': "One-off", 'value': 0}],
             value= risk_choices[0],
             inline=True,
         ),
@@ -54,7 +53,7 @@ monthly_or_not = html.Div(
 
 amount_invested_input = dbc.Row(
     [
-    dbc.Label("Set monthly investment"),
+    dbc.Label("Set investment amount"),
     dbc.Col(
         dbc.Input(id = 'amount_invested',
                   type="number", min=0, max=10000, step=1,
@@ -154,7 +153,7 @@ app.layout = html.Div(children=[
 
 
 risk_dict = {
-    'Moderate'      : 0.1,
+    'Moderate'      : 10,
     'Conservative'  : 0.03
 }
 

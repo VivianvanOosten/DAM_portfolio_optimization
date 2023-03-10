@@ -113,11 +113,6 @@ covariance.iloc[0] = 0
 
 # %%
 
-time_frame = 1 # In percentage standard deviation required
-min_return = 5000
-max_risk = 10
-amount_invested = 100000
-
 # %%
 def printSolution(m, investment_amount, assets):
     if m.status == GRB.OPTIMAL:
@@ -165,15 +160,14 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     
     #sum of investments
     m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
-   if(installment_flag==0):
+    if(installment_flag==0):
         # Objective function:
         m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets) - amount_invested, 
                GRB.MAXIMIZE)
-    
     else:
         # Objective function:  - monthly instalment version
-    m.setObjective(quicksum(quicksum(investment_amount[a]/12/time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12)) - amount_invested, 
-                   GRB.MAXIMIZE)
+        m.setObjective(quicksum(quicksum(investment_amount[a]/12/time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12)) - amount_invested, 
+                    GRB.MAXIMIZE)
         
     m.optimize()
 
