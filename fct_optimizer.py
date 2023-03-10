@@ -145,26 +145,31 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     investment_amount = m.addVars(assets, vtype=GRB.INTEGER, lb = 0, name = "investment_amount")
 
 
-    #min return accepted       
-#     m.addConstr((quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets)-amount_invested >= min_return),
-#                 name = "minimum return accepted")
-    
-    #min return accepted - monthly instalment version
-    m.addConstr((       quicksum(quicksum(investment_amount[a]/12*time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
+    if(instalment_flag=0):
+        #min return accepted       
+        m.addConstr((quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets)-amount_invested >= min_return),
                 name = "minimum return accepted")
+    else:
+        #min return accepted - monthly instalment version
+        m.addConstr((       quicksum(quicksum(investment_amount[a]/12*time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
+                name = "minimum return accepted")
+    
+    
+    
 
     #max risk accepted 
     m.addConstr((quicksum(investment_amount[a1]*investment_amount[a2]*covariance.loc[a1,a2]/((amount_invested)**2) 
-                        for a1 in assets for a2 in assets)) + 0.000718 <= ((max_risk*(quicksum(investment_amount[a1] for a1 in assets))/amount_invested/100)**2), name="maximum risk accepted")
+                        for a1 in assets for a2 in assets)) + 0.000718 <= (max_risk**2), name="maximum risk accepted")
 
     #0.000718(The market varaince calculated using UK GDP numbers) is added to the risk limit
     
-    #sum of investments
-    m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
-
-    # Objective function:
-#     m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets) - amount_invested, 
-#                GRB.MAXIMIZE)
+    if(instalment_flag=0):
+        #sum of investments
+        m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
+    else:
+        # Objective function:
+        m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets) - amount_invested, 
+               GRB.MAXIMIZE)
     
     # Objective function:  - monthly instalment version
     m.setObjective(quicksum(quicksum(investment_amount[a]/12*time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12)) - amount_invested, 
