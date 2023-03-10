@@ -58,7 +58,7 @@ amount_invested_input = dbc.Row(
     dbc.Col(
         dbc.Input(id = 'amount_invested',
                   type="number", min=0, max=10000, step=1,
-                  placeholder = 'Write the monthly investment amount here: 0 - 10 thousand'),
+                  placeholder = 'Write the investment amount here: 0 - 10 thousand'),
         width = 10
     )
     ],
