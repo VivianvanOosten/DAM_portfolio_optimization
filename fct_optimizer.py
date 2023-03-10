@@ -160,9 +160,6 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets), 
                 GRB.MAXIMIZE)
 
-    #add the objective function to minimize risk 
-    #send Vivian the output from running the model
-
 
     m.optimize()
 

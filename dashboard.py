@@ -235,3 +235,6 @@ fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
     )
 
 """
+
+
+# NOTE: color-code assets by risk-level
