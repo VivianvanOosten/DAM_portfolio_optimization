@@ -146,7 +146,11 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
 
 
     #min return accepted       
-    m.addConstr((quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets)-amount_invested >= min_return),
+#     m.addConstr((quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets)-amount_invested >= min_return),
+#                 name = "minimum return accepted")
+    
+    #min return accepted - monthly instalment version
+    m.addConstr((       quicksum(quicksum(investment_amount[a]/12*time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
                 name = "minimum return accepted")
 
     #max risk accepted 
@@ -159,8 +163,12 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
 
     # Objective function:
-    m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets) - amount_invested, 
-                GRB.MAXIMIZE)
+#     m.setObjective(quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets) - amount_invested, 
+#                GRB.MAXIMIZE)
+    
+    # Objective function:  - monthly instalment version
+    m.setObjective(quicksum(quicksum(investment_amount[a]/12*time_frame*((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12)) - amount_invested, 
+                   GRB.MAXIMIZE)
 
     #add the objective function to minimize risk 
     #send Vivian the output from running the model
