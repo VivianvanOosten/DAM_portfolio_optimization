@@ -169,8 +169,11 @@ risk_dict = {
 )
 def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag):
 
+    if installment_flag == 1:
+        amount_invested = amount_invested * 12 * years
+
     if submission_number is None or submission_number == 0:
-         return "No data yet", no_update
+        return "No data yet", no_update
     
     max_risk = risk_dict[risk]
 
