@@ -133,7 +133,7 @@ def printSolution(m, investment_amount, assets):
 
 assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
 
-def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets):
+def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag):
 
     # Create a new model:
     m = gp.Model("portfolio")
@@ -145,7 +145,7 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     investment_amount = m.addVars(assets, vtype=GRB.INTEGER, lb = 0, name = "investment_amount")
 
 
-    if(instalment_flag=0):
+    if(installment_flag==0):
         #min return accepted       
         m.addConstr((quicksum(investment_amount[a]*((1+returns[a])**(12*time_frame)) for a in assets)-amount_invested >= min_return),
                 name = "minimum return accepted")
@@ -163,7 +163,7 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
 
     #0.000718(The market varaince calculated using UK GDP numbers) is added to the risk limit
     
-    if(instalment_flag=0):
+    if(installment_flag==0):
         #sum of investments
         m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
     else:

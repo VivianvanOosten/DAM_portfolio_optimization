@@ -38,6 +38,20 @@ currency_dropdown = dcc.Dropdown(
     style = {'color': '#000000'},
 )
 
+time_choices = ['Monthly','One-off']
+monthly_or_not = html.Div(
+    [
+        dbc.Label("Is the amount below a monthly or a one-off investment?"),
+        dbc.RadioItems(
+            id="monthly_or_not",
+            options=[{"label": i, "value": i} for i in time_choices],
+            value= risk_choices[0],
+            inline=True,
+        ),
+    ],
+    className="mb-4",
+)
+
 amount_invested_input = dbc.Row(
     [
     dbc.Label("Set monthly investment"),
@@ -93,6 +107,7 @@ submit = html.Button('Submit', id='submit-val', n_clicks=0)
 controls = html.Div(
     [risk_level_checklist, 
      slider, 
+     monthly_or_not, 
      amount_invested_input, 
      amount_goal_input, 
      submit
@@ -150,17 +165,17 @@ risk_dict = {
     State('risk_level', 'value'),
     State('years', 'value'),
     State('amount_invested','value'),
-    State('goal_amount','value')
+    State('goal_amount','value'),
+    State('monthly_or_not','value')
 )
-def update_output(submission_number, risk, years, amount_invested, min_return):
+def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag):
 
     if submission_number is None or submission_number == 0:
          return "No data yet", no_update
     
-
     max_risk = risk_dict[risk]
 
-    m, investment_amount = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns, assets)
+    m, investment_amount = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag)
 
     if m.status == GRB.OPTIMAL:
         print('\nPortfolio Return: %g' % m.objVal)
