@@ -63,7 +63,7 @@ ftse['Date'] = pd.to_datetime(ftse['Date'])
 ftse = ftse.sort_values(by="Date")
 
 # %%
-bank_rates['Rate'] = bank_rates['Rate']/12
+bank_rates['Rate'] = bank_rates['Rate']/1200
 
 # %%
 house_prices['Date'] = pd.to_datetime(house_prices['Date'])
@@ -126,7 +126,7 @@ def printSolution(m, investment_amount, assets):
 
 # %%
 
-assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
+assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'bank_rates'] 
 
 def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag):
 
