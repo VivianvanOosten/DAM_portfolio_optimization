@@ -95,6 +95,7 @@ mean_returns = mean_returns.to_dict()
 
 # %%
 mean_returns['riskfree'] = 0.00322 # current yearly rate is 3.864%, thus monthly rate is 3.864/12
+mean_returns['ftse'] = mean_returns['ftse'] + 3.64/1200 #Accounting for average divident yield of 3.64% annually alongside stock return
 
 # %%
 variance = returns.var()
