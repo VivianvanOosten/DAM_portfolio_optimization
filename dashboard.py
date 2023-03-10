@@ -56,7 +56,7 @@ amount_invested_input = dbc.Row(
     dbc.Label("Set investment amount"),
     dbc.Col(
         dbc.Input(id = 'amount_invested',
-                  type="number", min=0, max=10000, step=1,
+                  type="number", #min=0, max=10000, step=1,
                   placeholder = 'Write the investment amount here: 0 - 10 thousand'),
         width = 10
     )
@@ -69,7 +69,7 @@ amount_goal_input = dbc.Row(
     dbc.Label("Set goal amount after time period"),
     dbc.Col(
         dbc.Input(id = 'goal_amount',
-                  type="number", min=0, max=10**7, step=1,
+                  type="number", #min=0, max=10**7, step=1,
                   placeholder = 'Write the investment goal here: 0 - 10 million'
                   ),
         width = 10
@@ -153,7 +153,7 @@ app.layout = html.Div(children=[
 
 
 risk_dict = {
-    'Moderate'      : 10,
+    'Moderate'      : 100,
     'Conservative'  : 0.03
 }
 
@@ -171,6 +171,7 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
 
     if installment_flag == 1:
         amount_invested = amount_invested * 12 * years
+        print(amount_invested)
 
     if submission_number is None or submission_number == 0:
         return "No data yet", no_update

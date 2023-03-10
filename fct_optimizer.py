@@ -150,8 +150,6 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
                 name = "minimum return accepted")
     
     
-    
-
     #max risk accepted 
     m.addConstr((quicksum(investment_amount[a1]*investment_amount[a2]*covariance.loc[a1,a2]/((amount_invested)**2) 
                         for a1 in assets for a2 in assets)) + 0.000718 <= (max_risk**2), name="maximum risk accepted")
