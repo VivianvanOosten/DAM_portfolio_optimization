@@ -63,7 +63,7 @@ ftse['Date'] = pd.to_datetime(ftse['Date'])
 ftse = ftse.sort_values(by="Date")
 
 # %%
-bank_rates['Rate'] = bank_rates['Rate']/12
+bank_rates['Rate'] = bank_rates['Rate']/1200
 
 # %%
 house_prices['Date'] = pd.to_datetime(house_prices['Date'])
@@ -95,6 +95,7 @@ mean_returns = mean_returns.to_dict()
 
 # %%
 mean_returns['riskfree'] = 0.00322 # current yearly rate is 3.864%, thus monthly rate is 3.864/12
+mean_returns['ftse'] = mean_returns['ftse'] + 3.64/1200 #Accounting for average divident yield of 3.64% annually alongside stock return
 
 # %%
 variance = returns.var()
@@ -126,7 +127,7 @@ def printSolution(m, investment_amount, assets):
 
 # %%
 
-assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
+assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'bank_rates'] 
 
 def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag):
 
@@ -158,6 +159,9 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     
     #sum of investments
     m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
+    
+    #maximum allocation constraint
+    m.addConstrs(((investment_amount[a1] <= 0.35*amount_invested) for a1 in assets), name="maximum allocation constraint")
     
     if(installment_flag==0):
         # Objective function:
