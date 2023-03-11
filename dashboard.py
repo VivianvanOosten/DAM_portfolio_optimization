@@ -101,6 +101,25 @@ slider = html.Div(
     className="mb-4",
 )
 
+min_nr_assets = dbc.Row(
+    [
+    dbc.Label("Set the minimum number of different assets"),
+    dbc.Col(
+        dbc.Input(id = 'min_assets',
+                  type="number", min=0, max=7, step=1,
+                  placeholder = 'Minimum number of different assets: 0 - 7'
+                  ),
+        width = 10
+    )
+    # , # Leaving out the currency for now - too complex
+    # dbc.Col(
+    # currency_dropdown,
+    # width = 2
+    # )
+    ],
+    className="mb-4",
+)
+
 submit = html.Button('Submit', id='submit-val', n_clicks=0)
 
 controls = html.Div(
@@ -109,6 +128,7 @@ controls = html.Div(
      monthly_or_not, 
      amount_invested_input, 
      amount_goal_input, 
+     min_nr_assets,
      submit
      ]
 )
