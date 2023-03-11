@@ -185,9 +185,10 @@ risk_dict = {
     State('years', 'value'),
     State('amount_invested','value'),
     State('goal_amount','value'),
-    State('monthly_or_not','value')
+    State('monthly_or_not','value'),
+    State('min_assets','value')
 )
-def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag):
+def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag, nr_assets):
 
     if installment_flag == 1:
         amount_invested = amount_invested * 12 * years
@@ -198,7 +199,7 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     
     max_risk = risk_dict[risk]
 
-    m, investment_amount = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag)
+    m, investment_amount = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag, nr_assets)
 
     if m.status == GRB.OPTIMAL:
         print('\nPortfolio Return: %g' % m.objVal)

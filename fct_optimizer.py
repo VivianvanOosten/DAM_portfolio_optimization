@@ -129,7 +129,7 @@ def printSolution(m, investment_amount, assets):
 
 assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'bank_rates'] 
 
-def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag):
+def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag, nr_assets):
 
     # Create a new model:
     m = gp.Model("portfolio")
@@ -161,7 +161,8 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     m.addConstr((quicksum(investment_amount[a1] for a1 in assets)) == amount_invested, name="sum of investments")
     
     #maximum allocation constraint
-    m.addConstrs(((investment_amount[a1] <= 0.35*amount_invested) for a1 in assets), name="maximum allocation constraint")
+    max_allocation = 1/nr_assets
+    m.addConstrs(((investment_amount[a1] <= max_allocation*amount_invested) for a1 in assets), name="maximum allocation constraint")
     
     if(installment_flag==0):
         # Objective function:
