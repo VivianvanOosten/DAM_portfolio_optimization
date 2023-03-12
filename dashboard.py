@@ -15,7 +15,7 @@ assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates']
 
 
 # variables
-risk_choices = ['Moderate','Conservative']
+risk_choices = {'Low Risk':0.03,'Medium Risk':0.07, 'High Risk':0.12}
 
 header = html.H4(
     "Portfolio optimization for LBS students", className="bg-primary text-white p-2 mb-2 text-center"
@@ -26,23 +26,10 @@ risk_level_checklist = html.Div(
         dbc.Label("Select Risk Level"),
         dbc.RadioItems(
             id="risk_level",
-            options=[{"label": i, "value": i} for i in risk_choices],
-            value= risk_choices[0],
+            options=[{"label": i, "value": i} for i in risk_choices.keys()],
+            value= 'Medium Risk',
             inline=True,
         ),
-    ],
-    className="mb-4",
-)
-
-risk_level = dbc.Row(
-    [
-    dbc.Label("Set risk level"),
-    dbc.Col(
-        dbc.Input(id = 'risk_number',
-                  type="number", #min=0, max=10000, step=1,
-                  placeholder = 'Write the risk percentage here'),
-        width = 10
-    )
     ],
     className="mb-4",
 )
@@ -60,7 +47,7 @@ monthly_or_not = html.Div(
         dbc.RadioItems(
             id="monthly_or_not",
             options=[{"label": 'Monthly', "value": 1}, {'label': "One-off", 'value': 0}],
-            value= risk_choices[0],
+            value= 'One-off',
             inline=True,
         ),
     ],
@@ -138,7 +125,6 @@ submit = html.Button('Submit', id='submit-val', n_clicks=0)
 
 controls = html.Div(
     [risk_level_checklist, 
-     risk_level,
      slider, 
      monthly_or_not, 
      amount_invested_input, 
@@ -191,12 +177,6 @@ app.layout = html.Div(children=[
     ])
 ])
 
-
-risk_dict = {
-    'Moderate'      : 0.3,
-    'Conservative'  : 0.003
-}
-
 @callback(
     Output("top_text", 'children'),
     Output('pie_chart', 'figure'),
@@ -207,10 +187,9 @@ risk_dict = {
     State('amount_invested','value'),
     State('goal_amount','value'),
     State('monthly_or_not','value'),
-    State('min_assets','value'),
-    State('risk_number','value')
+    State('min_assets','value')
 )
-def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag, nr_assets,risk_level):
+def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag, nr_assets):
 
     if submission_number is None or submission_number == 0:
         return "You haven't submitted inputs yet", no_update, no_update
@@ -220,9 +199,7 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     
     min_return_function = min_return - amount_invested
     
-    max_risk = risk_dict[risk]
-    if risk_level:
-        max_risk = float(risk_level)
+    max_risk = risk_choices[risk]
 
     print(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
@@ -262,7 +239,7 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     x_range = []
 
     if installment_flag==0:
-        for year in range(1,years+1):
+        for year in range(years+1):
             reg_return = 0
             low_return = 0
             high_return =0
@@ -282,7 +259,7 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
             x_range.append(year)
 
     else:
-        for month1 in range(1,years*12+1):
+        for month1 in range(0,years*12+1):
             reg_return = 0
             low_return = 0
             high_return = 0
