@@ -34,6 +34,19 @@ risk_level_checklist = html.Div(
     className="mb-4",
 )
 
+risk_level = dbc.Row(
+    [
+    dbc.Label("Set risk level"),
+    dbc.Col(
+        dbc.Input(id = 'risk_number',
+                  type="number", #min=0, max=10000, step=1,
+                  placeholder = 'Write the risk percentage here'),
+        width = 10
+    )
+    ],
+    className="mb-4",
+)
+
 currencies = ['$','€','£']
 currency_dropdown = dcc.Dropdown(
     id="Currency",
@@ -60,7 +73,7 @@ amount_invested_input = dbc.Row(
     dbc.Col(
         dbc.Input(id = 'amount_invested',
                   type="number", #min=0, max=10000, step=1,
-                  placeholder = 'Write the investment amount here: 0 - 10 thousand'),
+                  placeholder = 'Write the investment amount here'),
         width = 10
     )
     ],
@@ -69,11 +82,11 @@ amount_invested_input = dbc.Row(
 
 amount_goal_input = dbc.Row(
     [
-    dbc.Label("Set goal amount after time period"),
+    dbc.Label("Set desired percentage return"),
     dbc.Col(
         dbc.Input(id = 'goal_amount',
-                  type="number", #min=0, max=10**7, step=1,
-                  placeholder = 'Write the investment goal here: 0 - 10 million'
+                  type="number", min=0, max=30, step=1,
+                  placeholder = 'Write the desired annual rate of return: 0 - 30%'
                   ),
         width = 10
     )
@@ -109,8 +122,8 @@ min_nr_assets = dbc.Row(
     dbc.Label("Set the minimum number of different assets"),
     dbc.Col(
         dbc.Input(id = 'min_assets',
-                  type="number", min=0, max=7, step=1,
-                  placeholder = 'Minimum number of different assets: 0 - 7'
+                  type="number", min=0, max=6, step=1,
+                  placeholder = 'Minimum number of different assets: 0 - 6'
                   ),
         width = 10
     )
@@ -127,6 +140,7 @@ submit = html.Button('Submit', id='submit-val', n_clicks=0)
 
 controls = html.Div(
     [risk_level_checklist, 
+     risk_level,
      slider, 
      monthly_or_not, 
      amount_invested_input, 
@@ -182,7 +196,7 @@ app.layout = html.Div(children=[
 
 risk_dict = {
     'Moderate'      : 0.3,
-    'Conservative'  : 0.03
+    'Conservative'  : 0.003
 }
 
 @callback(
@@ -195,19 +209,22 @@ risk_dict = {
     State('amount_invested','value'),
     State('goal_amount','value'),
     State('monthly_or_not','value'),
-    State('min_assets','value')
+    State('min_assets','value'),
+    State('risk_level','value')
 )
-def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag, nr_assets):
+def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag, nr_assets,risk_level):
 
     if installment_flag == 1:
         amount_invested = amount_invested * 12 * years
 
     if submission_number is None or submission_number == 0:
-        return "No data yet", no_update, no_update
+        return "You haven't submitted inputs yet", no_update, no_update
     
     min_return_function = min_return - amount_invested
     
     max_risk = risk_dict[risk]
+    if risk_level:
+        max_risk = risk_level
 
     print(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
@@ -224,15 +241,13 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
         print('No solution:', m.status)
         text = html.H1(
             [
-                html.Div("No solution with these inputs", style={"color": "red"}),
+                html.Div("You cannot earn a return of {}% with these inputs".format(round(min_return_function/amount_invested * 100),1), style={"color": "red"}),
             ]
         )
         return text, px.pie(), px.line()
 
     
-    text = ['We have chosen risk level: {}'.format(risk),
-            html.Br(), 
-            'outcome of optimizer is {}'.format(m.objVal)
+    text = ['Our total value of investments will be {} after {} years'.format(m.objVal, years)
             ]
     
 
