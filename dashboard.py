@@ -140,15 +140,20 @@ df = pd.DataFrame({
     "Amount": [0]*len(assets)
 })
 
-fig = px.pie(df, values="Amount", names = 'Assets')
+fig_pie = px.pie(df, values="Amount", names = 'Assets')
 
-
+fig_line = px.line()
 
 outputs = html.Div(
-    [html.Div(id = 'showing_text', children = 'our output is this'),
+    [html.Div(id = 'top_text', children = "You haven't submitted inputs yet"),
      dcc.Graph(
         id='pie_chart',
-        figure=fig
+        figure=fig_pie
+    ),
+    html.Div(id = 'middle_text'),
+    dcc.Graph(
+     id = 'line_chart',
+     figure = fig_line
     )]
 )
 
@@ -178,7 +183,7 @@ risk_dict = {
 }
 
 @callback(
-    Output("showing_text", 'children'),
+    Output("top_text", 'children'),
     Output('pie_chart', 'figure'),
     Input('submit-val', 'n_clicks'),
     State('risk_level', 'value'),
@@ -197,12 +202,15 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     if submission_number is None or submission_number == 0:
         return "No data yet", no_update
     
+    min_return_function = min_return - amount_invested
+    
     max_risk = risk_dict[risk]
 
-    m, investment_amount = creating_and_running_optimizer(years, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag, nr_assets)
+    m, investment_amount = creating_and_running_optimizer(years, min_return_function, max_risk, amount_invested, covariance, returns, assets, installment_flag, nr_assets)
 
     if m.status == GRB.OPTIMAL:
-        print('\nPortfolio Return: %g' % m.objVal)
+        total_return = m.objVal
+        print('\nPortfolio Return: %g' % total_return)
         print('\nInvestment Amount:')
         investment_amountx = m.getAttr('x', investment_amount) 
         for a in assets:            
@@ -230,9 +238,57 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
 
     fig = px.pie(df, values="Amount", names = 'Assets')
 
+    lowest_range = []
+    regular_range = []
+    highest_range = []
+
+    if installment_flag==0:
+        for year in range(years):
+            for a in assets:
+
+                reg_return = investment_amountx[a]*((1+returns[a])**(12*year))
+                regular_range.append(reg_return)
+
+                low_return = investment_amountx[a]*((1+(returns[a]-max_risk))**(12*year))
+                lowest_range.append(low_return)
+
+                high_return = investment_amountx[a]*((1+(returns[a]+max_risk))**(12*year))
+                highest_range.append(high_return)
+    else:
+        for year in range(years):
+            #min return accepted - monthly instalment version
+            tot_return = 0
+            for a in assets:
+                a_return = investment_amountx[a]/(12*year) * (1+returns[a])**(12*(years-year))
+            m.addConstr((quicksum( quicksum( (investment_amount[a]/(12*time_frame)) * ((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
+                    name = "minimum return accepted")
+    
+
+    nr_years = years
+    lowest = total_return * (1 - max_risk)
+    highest = total_return * (1 + max_risk)
+
+    lowest_range = range(amount_invested, round(lowest), round((lowest - amount_invested)/nr_years) )
+    regular_range = range(amount_invested, round(total_return),  round((total_return - amount_invested)/nr_years ) )
+    highest_range = range(amount_invested, round(highest), round((total_return - highest)/nr_years ) )
+    
+
+    df_line = pd.DataFrame({
+         "Years": range(0, years+1, 1), 
+         "Poor market conditions": lowest_range,
+         "Intermediate market conditions": regular_range,
+         "Good market conditions": highest_range
+    })
+
+    df_line = df_line.stack()
+    print(df_line.head())
+
+    fig_line = px.line()
+    fig_line.update_traces(mode="markers+lines", hovertemplate=None)
+    fig_line.update_layout(hovermode="x unified")
 
     
-    return text, fig
+    return text, fig_pie, fig_line
 
 
 
