@@ -270,13 +270,13 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
             high_return = 0
             for a in assets:
 
-                reg_return_a = investment_amountx[a]/(12*years) * (1+returns[a])**(12*(years-year))
+                reg_return_a = investment_amountx[a]/(12*years) * (1+ returns[a])**(12*(years-year))
                 reg_return += reg_return_a
 
-                low_return_a = investment_amountx[a]/(12*years) * (1+returns[a] - max_risk)**(12*(years-year))
+                low_return_a = investment_amountx[a]/(12*years) * (1+ returns[a] - max_risk)**(12*(years-year))
                 low_return += low_return_a
 
-                high_return_a = investment_amountx[a]/(12*years) * (1+returns[a] + max_risk)**(12*(years-year))
+                high_return_a = investment_amountx[a]/(12*years) * (1+ returns[a] + max_risk)**(12*(years-year))
                 high_return += high_return_a
 
             regular_range.append(reg_return)
@@ -291,9 +291,10 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     })
 
     df_line = df_line.set_index('Years').stack().reset_index()
+    df_line.rename({'level_1':'Market Conditions', 0:"Value"}, inplace=True, axis=1)
     print(df_line.head())
 
-    fig_line = px.line(df_line, x = 'Years', y = 0, color = 'level_1')
+    fig_line = px.line(df_line, x = 'Years', y = 'Value', color = 'Market Conditions')
     fig_line.update_traces(mode="markers+lines", hovertemplate=None)
     fig_line.update_layout(hovermode="x unified")
 
