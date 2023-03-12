@@ -178,7 +178,7 @@ app.layout = html.Div(children=[
 
 
 risk_dict = {
-    'Moderate'      : 0.1,
+    'Moderate'      : 0.3,
     'Conservative'  : 0.03
 }
 
@@ -198,7 +198,6 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
 
     if installment_flag == 1:
         amount_invested = amount_invested * 12 * years
-        print(amount_invested)
 
     if submission_number is None or submission_number == 0:
         return "No data yet", no_update, no_update
@@ -206,7 +205,6 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     min_return_function = min_return - amount_invested
     
     max_risk = risk_dict[risk]
-    print(mean_returns)
 
     m, investment_amount = creating_and_running_optimizer(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
