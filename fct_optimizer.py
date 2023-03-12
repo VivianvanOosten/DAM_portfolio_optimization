@@ -106,10 +106,8 @@ def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_inve
     # Create a new model:
     m = gp.Model("portfolio")
 
-    print(covariance)
-
     investment_amount = m.addVars(assets, vtype=GRB.INTEGER, lb = 0, name = "investment_amount")
-
+    
 
     if(installment_flag==0):
         #min return accepted       

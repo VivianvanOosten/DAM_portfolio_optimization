@@ -82,11 +82,11 @@ amount_invested_input = dbc.Row(
 
 amount_goal_input = dbc.Row(
     [
-    dbc.Label("Set desired percentage return"),
+    dbc.Label("Set the desired amount at the end of the time period"),
     dbc.Col(
         dbc.Input(id = 'goal_amount',
-                  type="number", min=0, max=30, step=1,
-                  placeholder = 'Write the desired annual rate of return: 0 - 30%'
+                  type="number", #min=0, max=30, step=1,
+                  placeholder = 'Write desired goal amount at the end of the period'
                   ),
         width = 10
     )
@@ -208,24 +208,21 @@ risk_dict = {
     State('goal_amount','value'),
     State('monthly_or_not','value'),
     State('min_assets','value'),
-    State('risk_level','value')
+    State('risk_number','value')
 )
 def update_output(submission_number, risk, years, amount_invested, min_return, installment_flag, nr_assets,risk_level):
 
-    if installment_flag == 1:
-        amount_invested = amount_invested * 12 * years
-
-    else: 
-        min_return = amount_invested*((1+min_return)**(12*year))
-
     if submission_number is None or submission_number == 0:
         return "You haven't submitted inputs yet", no_update, no_update
+    
+    if installment_flag == 1:
+        amount_invested = amount_invested * 12 * years
     
     min_return_function = min_return - amount_invested
     
     max_risk = risk_dict[risk]
     if risk_level:
-        max_risk = risk_level
+        max_risk = float(risk_level)
 
     print(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
@@ -242,13 +239,13 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
         print('No solution:', m.status)
         text = html.H1(
             [
-                html.Div("You cannot earn a return of {}% with these inputs".format(round(min_return_function/amount_invested * 100),1), style={"color": "red"}),
+                html.Div("You cannot earn a return of {} with these inputs".format(round(min_return_function),1), style={"color": "red"}),
             ]
         )
         return text, px.pie(), px.line()
 
     
-    text = ['Our total value of investments will be {} after {} years'.format(m.objVal, years)
+    text = ['The total value of your investments will be {:,}$ after {} years, see details below'.format(round(m.objVal), years)
             ]
     
 
@@ -262,9 +259,10 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     lowest_range = []
     regular_range = []
     highest_range = []
+    x_range = []
 
     if installment_flag==0:
-        for year in range(years):
+        for year in range(1,years+1):
             reg_return = 0
             low_return = 0
             high_return =0
@@ -272,39 +270,41 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
                 reg_return_a = investment_amountx[a]*((1+mean_returns[a])**(12*year))
                 reg_return += reg_return_a
 
-                low_return_a = investment_amountx[a]*((1+(mean_returns[a]-max_risk))**(12*year))
+                low_return_a = investment_amountx[a]*((1+(mean_returns[a]*(1-max_risk)))**(12*year))
                 low_return += low_return_a
                 
-                high_return_a = investment_amountx[a]*((1+(mean_returns[a]+max_risk))**(12*year))
+                high_return_a = investment_amountx[a]*((1+(mean_returns[a]*(1+max_risk)))**(12*year))
                 high_return += high_return_a
                 
             regular_range.append(reg_return)
             lowest_range.append(low_return)
             highest_range.append(high_return)
+            x_range.append(year)
 
     else:
-        for year in range(years):
-            #min return accepted - monthly instalment version
+        for month1 in range(1,years*12+1):
             reg_return = 0
             low_return = 0
             high_return = 0
-            for a in assets:
+            for month2 in range(1, month1+1):
+                for a in assets:
 
-                reg_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a])**(12*(years-year))
-                reg_return += reg_return_a
+                    reg_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a])**(month1-month2)
+                    reg_return += reg_return_a
 
-                low_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a] - max_risk)**(12*(years-year))
-                low_return += low_return_a
+                    low_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a]*(1 - max_risk))**(month1-month2)
+                    low_return += low_return_a
 
-                high_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a] + max_risk)**(12*(years-year))
-                high_return += high_return_a
+                    high_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a]* (1 + max_risk))**(month1-month2)
+                    high_return += high_return_a
 
             regular_range.append(reg_return)
             lowest_range.append(low_return)
             highest_range.append(high_return)
+            x_range.append(month1)
 
     df_line = pd.DataFrame({
-         "Years": range(0, years, 1), 
+         "Years": x_range, 
          "Poor market conditions": lowest_range,
          "Intermediate market conditions": regular_range,
          "Good market conditions": highest_range
