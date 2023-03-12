@@ -178,7 +178,7 @@ app.layout = html.Div(children=[
 
 
 risk_dict = {
-    'Moderate'      : 100,
+    'Moderate'      : 0.1,
     'Conservative'  : 0.03
 }
 
@@ -292,6 +292,7 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
 
     df_line = df_line.set_index('Years').stack().reset_index()
     df_line.rename({'level_1':'Market Conditions', 0:"Value"}, inplace=True, axis=1)
+    print(type(df_line))
     print(df_line.head())
 
     fig_line = px.line(df_line, x = 'Years', y = 'Value', color = 'Market Conditions')
