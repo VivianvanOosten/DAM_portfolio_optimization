@@ -244,22 +244,31 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
 
     if installment_flag==0:
         for year in range(years):
+            reg_return = 0
+            low_return = 0
+            high_return =0
             for a in assets:
+                reg_return_a = investment_amountx[a]*((1+returns[a])**(12*year))
+                reg_return += reg_return_a
 
-                reg_return = investment_amountx[a]*((1+returns[a])**(12*year))
-                regular_range.append(reg_return)
+                low_return_a = investment_amountx[a]*((1+(returns[a]-max_risk))**(12*year))
+                low_return += low_return_a
+                
+                high_return_a = investment_amountx[a]*((1+(returns[a]+max_risk))**(12*year))
+                high_return += high_return_a
+                
+            regular_range.append(reg_return)
+            lowest_range.append(low_return)
+            highest_range.append(high_return)
 
-                low_return = investment_amountx[a]*((1+(returns[a]-max_risk))**(12*year))
-                lowest_range.append(low_return)
-
-                high_return = investment_amountx[a]*((1+(returns[a]+max_risk))**(12*year))
-                highest_range.append(high_return)
     else:
         for year in range(years):
             #min return accepted - monthly instalment version
             tot_return = 0
             for a in assets:
-                a_return = investment_amountx[a]/(12*year) * (1+returns[a])**(12*(years-year))
+
+                reg_return = investment_amountx[a]/(12*years) * (1+returns[a])**(12*(years-year))
+
             m.addConstr((quicksum( quicksum( (investment_amount[a]/(12*time_frame)) * ((1+returns[a])**(12*time_frame-i)) for a in assets) for i in range(time_frame*12))      -amount_invested >= min_return),
                     name = "minimum return accepted")
     
