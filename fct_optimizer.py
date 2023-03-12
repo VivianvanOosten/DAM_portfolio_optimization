@@ -21,16 +21,11 @@ import seaborn as sns # general visualization package
 import matplotlib.pyplot as plt # general visualization package 
 #next command allows you to display the figures in the notebook 
 
-# %%
-# Import the gurobi package
 import gurobipy as gp
 from gurobipy import GRB,quicksum
 import datetime
 
-# %% [markdown]
-# # Data
 
-# %%
 riskfree = pd.read_csv('DAM_portfolio_optimization/data/riskfree.csv')
 bitcoin = pd.read_csv('DAM_portfolio_optimization/data/bitcoin.csv')
 gold = pd.read_csv('DAM_portfolio_optimization/data/Gold.csv')
@@ -38,7 +33,6 @@ ftse = pd.read_csv('DAM_portfolio_optimization/data/FTSE.csv')
 bank_rates = pd.read_excel('DAM_portfolio_optimization/data/bank_rates.xlsx')
 house_prices = pd.read_excel('DAM_portfolio_optimization/data/house_prices.xlsx')
 
-# %%
 riskfree = riskfree.dropna()
 bitcoin = bitcoin.dropna()
 gold = gold.dropna()
@@ -46,33 +40,25 @@ ftse = ftse.dropna()
 bank_rates = bank_rates.dropna()
 house_prices = house_prices.dropna()
 
-# %%
 riskfree['Date'] = pd.to_datetime(riskfree['Date'], format='%b-%y')
 riskfree = riskfree.sort_values(by='Date')
 
-# %%
 bitcoin['Date'] = pd.to_datetime(bitcoin['Date'])
 bitcoin = bitcoin.sort_values(by="Date")
 
-# %%
 gold['Date'] = pd.to_datetime(gold['Date'])
 gold = gold.sort_values(by="Date")
 
-# %%
 ftse['Date'] = pd.to_datetime(ftse['Date'])
 ftse = ftse.sort_values(by="Date")
 
-# %%
 bank_rates['Rate'] = bank_rates['Rate']/1200
 
-# %%
 house_prices['Date'] = pd.to_datetime(house_prices['Date'])
 house_prices = house_prices.sort_values(by="Date")
 
-# %%
 values = pd.DataFrame()
 
-# %%
 values.index = riskfree['Date'].dt.strftime('%m/%Y')
 values['riskfree'] = riskfree['Price'].values
 values['bitcoin'] = bitcoin['Open'].values
@@ -83,38 +69,27 @@ values["ftse"] = values["ftse"].astype(float)
 values["house_prices"] = house_prices['PX_MID'].values
 values["bank_rates"] = bank_rates['Rate'].values
 
-# %%
 returns = pd.DataFrame()
 returns = values.pct_change(1)
 returns['bank_rates'] = values['bank_rates']
 
-
-# %%
 mean_returns = returns.mean()
 mean_returns = mean_returns.to_dict()
 
-# %%
 mean_returns['riskfree'] = 0.00322 # current yearly rate is 3.864%, thus monthly rate is 3.864/12
 mean_returns['ftse'] = mean_returns['ftse'] + 3.64/1200 #Accounting for average divident yield of 3.64% annually alongside stock return
 
-# %%
 variance = returns.var()
 variance = variance.to_dict()
 
-# %%
 variance['riskfree'] = 0 # assume
 
-# %%
-covariance = values.cov()
+covariance = returns.cov()
 
-# %%
 covariance['riskfree'] = 0
 covariance.iloc[0] = 0
 
 
-# %%
-
-# %%
 def printSolution(m, investment_amount, assets):
     if m.status == GRB.OPTIMAL:
         print('\nPortfolio Return: %g' % m.objVal)
@@ -125,18 +100,13 @@ def printSolution(m, investment_amount, assets):
     else:
         print('No solution:', m.status)
 
-# %%
-
-assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
-
+    
 def creating_and_running_optimizer(time_frame, min_return, max_risk, amount_invested, covariance, returns, assets, installment_flag, nr_assets):
 
     # Create a new model:
     m = gp.Model("portfolio")
 
-    returns = mean_returns
-
-    risks = variance
+    print(covariance)
 
     investment_amount = m.addVars(assets, vtype=GRB.INTEGER, lb = 0, name = "investment_amount")
 

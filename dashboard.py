@@ -5,10 +5,13 @@ import gurobipy as gp
 from gurobipy import GRB,quicksum
 from dash import Dash, dcc, html, Input, State, Output, callback, no_update
 from dash.exceptions import PreventUpdate
-from fct_optimizer import covariance, mean_returns, assets, creating_and_running_optimizer
+from fct_optimizer import covariance, mean_returns, creating_and_running_optimizer
 
 dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
 app = Dash(__name__, external_stylesheets=[dbc.themes.SUPERHERO, dbc_css])
+
+
+assets = ['riskfree', 'bitcoin', 'gold', 'ftse', 'house_prices', 'bank_rates'] 
 
 
 # variables
@@ -205,6 +208,8 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     min_return_function = min_return - amount_invested
     
     max_risk = risk_dict[risk]
+
+    print(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
     m, investment_amount = creating_and_running_optimizer(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
