@@ -5,7 +5,7 @@ import gurobipy as gp
 from gurobipy import GRB,quicksum
 from dash import Dash, dcc, html, Input, State, Output, callback, no_update
 from dash.exceptions import PreventUpdate
-from fct_optimizer import covariance, returns, assets, creating_and_running_optimizer
+from fct_optimizer import covariance, mean_returns, assets, creating_and_running_optimizer
 
 dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
 app = Dash(__name__, external_stylesheets=[dbc.themes.SUPERHERO, dbc_css])
@@ -206,8 +206,9 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
     min_return_function = min_return - amount_invested
     
     max_risk = risk_dict[risk]
+    print(mean_returns)
 
-    m, investment_amount = creating_and_running_optimizer(years, min_return_function, max_risk, amount_invested, covariance, returns, assets, installment_flag, nr_assets)
+    m, investment_amount = creating_and_running_optimizer(years, min_return_function, max_risk, amount_invested, covariance, mean_returns, assets, installment_flag, nr_assets)
 
     if m.status == GRB.OPTIMAL:
         total_return = m.objVal
@@ -249,13 +250,13 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
             low_return = 0
             high_return =0
             for a in assets:
-                reg_return_a = investment_amountx[a]*((1+returns[a])**(12*year))
+                reg_return_a = investment_amountx[a]*((1+mean_returns[a])**(12*year))
                 reg_return += reg_return_a
 
-                low_return_a = investment_amountx[a]*((1+(returns[a]-max_risk))**(12*year))
+                low_return_a = investment_amountx[a]*((1+(mean_returns[a]-max_risk))**(12*year))
                 low_return += low_return_a
                 
-                high_return_a = investment_amountx[a]*((1+(returns[a]+max_risk))**(12*year))
+                high_return_a = investment_amountx[a]*((1+(mean_returns[a]+max_risk))**(12*year))
                 high_return += high_return_a
                 
             regular_range.append(reg_return)
@@ -270,13 +271,13 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
             high_return = 0
             for a in assets:
 
-                reg_return_a = investment_amountx[a]/(12*years) * (1+ returns[a])**(12*(years-year))
+                reg_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a])**(12*(years-year))
                 reg_return += reg_return_a
 
-                low_return_a = investment_amountx[a]/(12*years) * (1+ returns[a] - max_risk)**(12*(years-year))
+                low_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a] - max_risk)**(12*(years-year))
                 low_return += low_return_a
 
-                high_return_a = investment_amountx[a]/(12*years) * (1+ returns[a] + max_risk)**(12*(years-year))
+                high_return_a = investment_amountx[a]/(12*years) * (1+ mean_returns[a] + max_risk)**(12*(years-year))
                 high_return += high_return_a
 
             regular_range.append(reg_return)
