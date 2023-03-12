@@ -99,18 +99,16 @@ amount_goal_input = dbc.Row(
     className="mb-4",
 )
 
-
-years = range(0,80)
 slider = html.Div(
     [   dbc.Label("Select Time-horizon"),
         dcc.Slider(
-            years[0],
-            years[-1],
-            5,
+            0,
+            20,
+            1,
             id="years",
             marks=None,
             tooltip={"placement": "bottom", "always_visible": True},
-            value= years[-5],
+            value= 1,
             className="p-0",
         ),
     ],
@@ -216,6 +214,9 @@ def update_output(submission_number, risk, years, amount_invested, min_return, i
 
     if installment_flag == 1:
         amount_invested = amount_invested * 12 * years
+
+    else: 
+        min_return = amount_invested*((1+min_return)**(12*year))
 
     if submission_number is None or submission_number == 0:
         return "You haven't submitted inputs yet", no_update, no_update
